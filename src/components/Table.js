@@ -27,22 +27,50 @@ const rows = [
 
 export default function DataTable() {
 const [selectedItem, setSelectedItem] = useState([]);
+const [chosenRow, setChosenRow] = useState({ id: '', lastName: '', firstName: '', age: '', team: '' });
+const [newRows, setNewRows] = useState(rows);
 
-useEffect((selectedItem) => {
-  if(selectedItem !== [] ){
-    console.log('true')
-} else {console.log('false')}}, [selectedItem]);
+const updateNewList = (index) =>{
+  const newList = newRows.map(x => x);
+
+  if((newList.find(x => x.id === index.id)) !== undefined){
+    let foundIndex = newList.find(x => x.id === index.id);
+    foundIndex = newList.findIndex(x => x.id === index.id)
+    newList[foundIndex] = index;
+    setNewRows(newList);
+  } else{
+    console.log(index);
+    index.id = Math.floor(Math.random() * 100);
+    console.log(index);
+    newList.push(index);
+    setNewRows(newList);
+  }
+}
+
+const handleDelete = () =>{
+  const newList = newRows.map(x => x); 
+  const deletedList = newList.filter(arr => !(selectedItem.find(item => (item === arr.id))));
+  setNewRows(deletedList);
+}
+
+useEffect(() => {
+    setChosenRow((item) => {
+      if(selectedItem.length===1){
+        return newRows.find(x => x.id === selectedItem[0])
+      } else { return { id: '', lastName: '', firstName: '', age: '', team: '' }}
+    })
+}, [selectedItem]);
 
   return (
     <div style={{ height: 400, width: '100%' }}>
       <DataGrid
-        rows={rows}
+        rows={newRows}
         columns={columns}
         checkboxSelection
         disableColumnMenu	
         onSelectionModelChange = {(item) => {setSelectedItem(item)}}
       />
-      <Form selected={selectedItem} />
+      <Form selectedItem={chosenRow} rows={rows} updateNewList={updateNewList} handleDelete={handleDelete}/>
     </div>
   );
 }
